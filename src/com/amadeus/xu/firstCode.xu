@@ -33,4 +33,7 @@ xu.main() {
     xu.println(0xA);
     xu.println(000045);
 
+    if isMember return 2.00 else 10.0
+    if (5+5) return 2.00 else 10.0
+
 }

@@ -3,12 +3,8 @@ package com.amadeus.xu.parser;
 import com.amadeus.xu.lexer.Token;
 import static com.amadeus.xu.lexer.TokenType.*;
 import  com.amadeus.xu.lexer.TokenType;
-import com.amadeus.xu.parser.expression.ExpressionNode;
-import com.amadeus.xu.parser.expression.GroupExpression;
-import com.amadeus.xu.parser.expression.LiteralExpression;
-import com.amadeus.xu.parser.expression.UnaryExpression;
+import com.amadeus.xu.parser.expression.*;
 
-import javax.swing.text.html.parser.AttributeList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +13,10 @@ public class Parser {
     private List<Token> tokens;
     private List<ExpressionNode> expressions;
     private int current;
+
+    public Parser() {
+
+    }
 
     public List<ExpressionNode> parseTokens(List<Token> tokens) {
         this.tokens = tokens;
@@ -29,13 +29,32 @@ public class Parser {
         return expressions;
     }
 
+    private ExpressionNode primary() {
+        if (match(INT, FLOAT)) {
+            return new LiteralExpression(previous());
+        }
+        if (match(LEFT_PARENTHESIS)) {
+            return group();
+        }
+        if (match(STRING)) {
+            return new LiteralExpression(previous());
+        }
+        if(match(TRUE, FALSE)) {
+            return new LiteralExpression(previous());
+        }
+        if (match(IDENTIFIER)) {
+            return new LiteralExpression(previous());
+        }
+
+        error("Invalid Expression " + peek().lexeme + ". ");
+        return null;
+    }
+
     private ExpressionNode expression() {
-        return unary();
+        return term();
     }
 
     private ExpressionNode unary() {
-
-
         if (match(MINUS, MARK)) {
             Token operator = previous();
             ExpressionNode expression = expression();
@@ -44,17 +63,26 @@ public class Parser {
         return primary();
     }
 
-    private ExpressionNode primary() {
-        if (match(INT, FLOAT)) {
-            return new LiteralExpression(previous());
+    private ExpressionNode term() {
+        ExpressionNode leftExpression = factor();
+        while (match(PLUS, MINUS)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = factor();
+            leftExpression = new TermExpression(leftExpression, operator, rightExpression);
         }
-        if (match(LEFT_PARENTHESIS)) {
-            return group();
-        }
-
-        error("Invalid Expression " + peek().lexeme + ". ");
-        return null;
+        return leftExpression;
     }
+
+    private ExpressionNode factor() {
+        ExpressionNode leftExpression = unary();
+        while (match(ASTERISK, SLASH)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = unary();
+            leftExpression = new FactorExpression(leftExpression, operator, rightExpression);
+        }
+        return leftExpression;
+    }
+
 
     private ExpressionNode group() {
         Token paren = previous();
@@ -70,7 +98,7 @@ public class Parser {
     }
 
     private void error(String message) {
-        throw new RuntimeException(message + "At line " + peek().line);
+        throw new RuntimeException(message + "at line " + peek().line + ":" + peek().column);
     }
 
     private boolean check(TokenType... types) {
@@ -103,6 +131,5 @@ public class Parser {
     private boolean isAtEnd() {
         return peek().type == EOF;
     }
-
 
 }

@@ -5,9 +5,10 @@ import java.util.HashMap;
 
 import static com.amadeus.xu.lexer.TokenType.*;
 
-//TODO 0b1010;    // Binário para decimal (10)
-//TODO 0o12;        // Octal para decimal (10)
-//TODO 0xA    // Hexadecimal para decimal (10);
+//TODO 0b1010;       Binário para decimal (10)
+//TODO 0o12;         Octal para decimal (10)
+//TODO 0xA           Hexadecimal para decimal (10)
+//TODO 100_000       Separador de casas (100000)
 
 public class Lexer {
 
@@ -101,6 +102,15 @@ public class Lexer {
             case '-':
                 makeToken(MINUS, "-");
                 break;
+            case '*':
+                makeToken(ASTERISK, "*");
+                break;
+            case '/':
+                makeToken(SLASH, "/");
+                break;
+            case '\'':
+                makeToken(BACKSLASH, "\"");
+                break;
             default:
                 if (isAlpha(c)) {
                     identifier();
@@ -128,7 +138,6 @@ public class Lexer {
 
         return source.charAt(current);
     }
-
 
     private char advance() {
         column++;
@@ -160,7 +169,6 @@ public class Lexer {
         String lexeme = source.substring(start, current);
         tokensList.add(new Token(tokenType, lexeme, line, column, null));
     }
-
 
     private void number() {
         while (isDigit(peek())) advance();

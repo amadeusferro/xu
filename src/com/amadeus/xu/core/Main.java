@@ -16,7 +16,7 @@ public class Main {
 
         StringBuilder sb = new StringBuilder();
 
-        File file = new File("src/com/amadeus/xu/secound.xu");
+        File file = new File("src/com/amadeus/xu/second.xu");
 
         try (Scanner sc = new Scanner(file)) {
             while (sc.hasNextLine()) {
@@ -36,10 +36,7 @@ public class Main {
 
         expressionsList.forEach(System.out::println);
 
-
-        //for (Token token : tokensList) {
-        //    System.out.println(token);
-        //}
+        //tokensList.forEach(System.out::println);
 
     }
 }
