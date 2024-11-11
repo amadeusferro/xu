@@ -17,4 +17,9 @@ public class GroupExpression extends ExpressionNode {
         return "Group(" + expression.toString() + ")";
     }
 
+    @Override
+    public String getTreeNode() {
+        return "<li><code>Group</code><ul>" + expression.getTreeNode() + "</ul></li>";
+    }
+
 }

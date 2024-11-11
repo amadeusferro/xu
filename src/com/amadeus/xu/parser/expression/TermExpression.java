@@ -19,4 +19,9 @@ public class TermExpression extends ExpressionNode {
         return "Factor(" + leftExpression.toString() + operator.type.name() + rightExpression.toString() + ")";
     }
 
+    @Override
+    public String getTreeNode() {
+        return "<li><code>Term</code><ul>" + leftExpression.getTreeNode() + "<li><code>" + operator.type.name() + "</code></li>" + rightExpression.getTreeNode() + "</ul></li>";
+    }
+
 }

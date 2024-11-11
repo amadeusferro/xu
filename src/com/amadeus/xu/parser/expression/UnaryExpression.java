@@ -17,4 +17,9 @@ public class UnaryExpression extends ExpressionNode {
     public String toString() {
         return "Unary(" + operator.type.name() + ", " + expression.toString() + ")";
     }
+
+    @Override
+    public String getTreeNode() {
+        return "<li><code>Unary(" + operator.type.name() + ")</code><ul>" + expression.getTreeNode() + " </ul></li>";
+    }
 }

@@ -15,4 +15,9 @@ public class LiteralExpression extends ExpressionNode {
     public String toString() {
         return "Literal(" + literal.literal.toString() + ')';
     }
+
+    @Override
+    public String getTreeNode() {
+        return "<li><code>Literal(" + literal.literal.toString() + ")</code></li>";
+    }
 }

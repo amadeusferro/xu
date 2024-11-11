@@ -16,7 +16,7 @@ public class Main {
 
         StringBuilder sb = new StringBuilder();
 
-        File file = new File("src/com/amadeus/xu/second.xu");
+        File file = new File("src/com/amadeus/xu/secondCode.xu");
 
         try (Scanner sc = new Scanner(file)) {
             while (sc.hasNextLine()) {
@@ -35,6 +35,10 @@ public class Main {
         List<ExpressionNode> expressionsList  = parser.parseTokens(tokensList);
 
         expressionsList.forEach(System.out::println);
+
+        System.out.println();
+        String HTML = TreeGenerator.generateTree(expressionsList);
+        TreeGenerator.writeHTML("Desktop//index.html", HTML);
 
         //tokensList.forEach(System.out::println);
 
