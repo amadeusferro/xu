@@ -4,6 +4,10 @@ import com.amadeus.xu.lexer.Token;
 import static com.amadeus.xu.lexer.TokenType.*;
 import  com.amadeus.xu.lexer.TokenType;
 import com.amadeus.xu.parser.expression.*;
+import com.amadeus.xu.parser.statment.BlockStatement;
+import com.amadeus.xu.parser.statment.ExpressionStatement;
+import com.amadeus.xu.parser.statment.IfStatement;
+import com.amadeus.xu.parser.statment.StatementNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,47 +15,90 @@ import java.util.List;
 public class Parser {
 
     private List<Token> tokens;
-    private List<ExpressionNode> expressions;
+    private List<StatementNode> statements;
     private int current;
 
     public Parser() {
 
     }
 
-    public List<ExpressionNode> parseTokens(List<Token> tokens) {
+    public List<StatementNode> parseTokens(List<Token> tokens) {
         this.tokens = tokens;
-        this.expressions = new ArrayList<>();
+        this.statements = new ArrayList<>();
 
         while(!isAtEnd()) {
-            expressions.add(expression());
+            statements.add(declaration());
         }
 
-        return expressions;
+        return statements;
     }
 
     private ExpressionNode primary() {
-        if (match(INT, FLOAT)) {
+        if (match(INT, FLOAT, STRING, TRUE, FALSE)) {
             return new LiteralExpression(previous());
+        }
+        if (match(IDENTIFIER)) {
+            return new VariableGetExpression(previous());
         }
         if (match(LEFT_PARENTHESIS)) {
             return group();
         }
-        if (match(STRING)) {
-            return new LiteralExpression(previous());
-        }
-        if(match(TRUE, FALSE)) {
-            return new LiteralExpression(previous());
-        }
-        if (match(IDENTIFIER)) {
-            return new LiteralExpression(previous());
-        }
-
         error("Invalid Expression " + peek().lexeme + ". ");
         return null;
     }
 
+
+    private StatementNode statement() {
+        if(match(IF)) return ifStatement();
+        //if(match(WHILE)) return whileStatement();
+        //if(match(FOR)) return forStatement();
+        if(match(LEFT_BRACES)) return blockStatement();
+        //if(match(PRINT)) return printStatement();
+
+        return expressionStatement();
+    }
+
+    private StatementNode blockStatement() {
+        List<StatementNode> statements = new ArrayList<>();
+
+        while (!check(RIGHT_BRACES)) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACES, "Expect '}' after body.");
+
+        return new BlockStatement(statements);
+    }
+
+
+    private StatementNode declaration() {
+
+        //if (match(IDENTIFIER)) return variableDeclaration();
+
+        return statement();
+    }
+
+    private StatementNode expressionStatement() {
+        ExpressionNode expression = expression();
+        //consume(SEMICOLON, "Expect ';' after expression.");
+        return new ExpressionStatement(expression);
+    }
+
+    private StatementNode ifStatement() {
+        consume(LEFT_PARENTHESIS, "Expect '(' after 'if'.");
+        ExpressionNode condition = expression();
+        consume(RIGHT_PARENTHESIS, "Expect ')' after 'if'.");
+        StatementNode thenBranch = statement();
+        StatementNode elseBranch = null;
+
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+        return new IfStatement(condition, thenBranch, elseBranch);
+    }
+
     private ExpressionNode expression() {
-        return term();
+        return assignment();
     }
 
     private ExpressionNode unary() {
@@ -61,6 +108,63 @@ public class Parser {
             return new UnaryExpression(operator, expression);
         }
         return primary();
+    }
+
+    private ExpressionNode assignment() {
+        ExpressionNode leftExpression = or();
+        if(match(EQUAL)) {
+            Token equal = previous();
+            ExpressionNode value = assignment();
+
+            if (leftExpression instanceof VariableGetExpression) {
+                Token name = ((VariableGetExpression) leftExpression).name;
+                return new AssignmentExpression(name, equal, value);
+            }
+            error("Invalid assignment target.");
+        }
+        return leftExpression;
+    }
+
+    private ExpressionNode or() {
+        ExpressionNode leftExpression = and();
+        while (match(OR)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = and();
+            leftExpression = new LogicalExpression(leftExpression, operator, rightExpression);
+        }
+        return leftExpression;
+    }
+
+    private ExpressionNode and() {
+        ExpressionNode leftExpression = equality();
+        while (match(AND)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = equality();
+            leftExpression = new LogicalExpression(leftExpression, operator, rightExpression);
+        }
+        return leftExpression;
+    }
+
+    private ExpressionNode equality() {
+        ExpressionNode leftExpression = comparison();
+
+        while(match(EQUAL_EQUAL, NOT_EQUAL)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = comparison();
+            leftExpression = new LogicalExpression(leftExpression, operator, rightExpression);
+        }
+
+        return leftExpression;
+    }
+
+    private ExpressionNode comparison() {
+        ExpressionNode leftExpression = term();
+        while (match(BIGGER, BIGGER_EQUAL, LESS, LESS_EQUAL)) {
+            Token operator = previous();
+            ExpressionNode rightExpression = term();
+            leftExpression = new LogicalExpression(leftExpression, operator, rightExpression);
+        }
+        return leftExpression;
     }
 
     private ExpressionNode term() {

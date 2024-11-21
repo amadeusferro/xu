@@ -31,6 +31,8 @@ public class Lexer {
         keywords.put("false", FALSE);
         keywords.put("while", WHILE);
         keywords.put("for", FOR);
+        keywords.put("or", OR);
+        keywords.put("and", AND);
     }
 
     public Lexer() {
@@ -88,7 +90,18 @@ public class Lexer {
                 makeToken(COMMA, ",");
                 break;
             case '>':
-                makeToken(BIGGER_THAN, ">");
+                if (match('=')) {
+                    makeToken(BIGGER_EQUAL, ">=");
+                } else {
+                    makeToken(BIGGER, ">");
+                }
+                break;
+            case '<':
+                if (match('=')) {
+                    makeToken(LESS_EQUAL, "<=");
+                } else {
+                    makeToken(LESS, "<");
+                }
                 break;
             case '+':
                 makeToken(PLUS, "+");
@@ -97,13 +110,24 @@ public class Lexer {
                 makeToken(SEMICOLON, ";");
                 break;
             case '!':
-                makeToken(MARK, "!");
+                if (match('=')) {
+                    makeToken(NOT_EQUAL, "!=");
+                } else {
+                    makeToken(MARK, "!");
+                }
                 break;
             case '-':
                 makeToken(MINUS, "-");
                 break;
             case '*':
                 makeToken(ASTERISK, "*");
+                break;
+            case '=':
+                if (match('=')) {
+                  makeToken(EQUAL_EQUAL, "==");
+                } else {
+                    makeToken(EQUAL, "=");
+                }
                 break;
             case '/':
                 makeToken(SLASH, "/");
@@ -202,5 +226,12 @@ public class Lexer {
 
         String str = source.substring(start + 1, current - 1);
         makeToken(STRING, str);
+    }
+
+    private boolean match(char c) {
+        if (isAtEnd()) return false;
+        if (peek() != c) return false;
+        advance();
+        return true;
     }
 }

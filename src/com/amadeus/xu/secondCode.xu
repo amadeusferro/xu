@@ -9,3 +9,38 @@ true
 a*x*x + b*y + c
 
 !!!!!!!!!(!(false))
+
+8 != 9
+
+true or false
+true and false
+
+10 + 20
+
+i32 x
+i32 y
+y = 20
+x = y
+
+
+if (!true) {
+    5 + 5
+} else {
+    x = true and false
+}
+
+
+{
+
+i32 x
+i32 y
+y = 20
+x = y
+
+!!!!!!!!!(!(false))
+
+8 != 9
+
+
+}
+

@@ -10,6 +10,7 @@ import com.amadeus.xu.lexer.Lexer;
 import com.amadeus.xu.lexer.Token;
 import com.amadeus.xu.parser.Parser;
 import com.amadeus.xu.parser.expression.ExpressionNode;
+import com.amadeus.xu.parser.statment.StatementNode;
 
 public class Main {
     public static void main(String[] args) {
@@ -32,15 +33,17 @@ public class Main {
         Parser parser = new Parser();
 
         ArrayList<Token> tokensList = lexer.scanTokens(content);
-        List<ExpressionNode> expressionsList  = parser.parseTokens(tokensList);
+
+        tokensList.forEach(System.out::println);
+
+        List<StatementNode> expressionsList  = parser.parseTokens(tokensList);
 
         expressionsList.forEach(System.out::println);
 
         System.out.println();
         String HTML = TreeGenerator.generateTree(expressionsList);
-        TreeGenerator.writeHTML("Desktop//index.html", HTML);
+        TreeGenerator.writeHTML("Desktop\\Index.html", HTML);
 
-        //tokensList.forEach(System.out::println);
 
     }
 }
