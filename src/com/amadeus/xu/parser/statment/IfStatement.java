@@ -16,12 +16,12 @@ public class IfStatement extends StatementNode {
 
     @Override
     public String toString() {
-        return "If(" + condition.toString() + thenStatement.toString() + elseStatement.toString() + ")";
+        return "If(" + condition.toString() + thenStatement.toString() + (elseStatement == null ? "" : elseStatement.toString()) + ")";
     }
 
     @Override
     public String getTreeNode() {
-        return "<li><code>If statement</code><ul>" + condition.getTreeNode() + thenStatement.getTreeNode() + "<li><code>else</code><ul>" + elseStatement.getTreeNode() + "</ul></li></li>";
+        return "<li><code>If statement</code><ul>" + condition.getTreeNode() + thenStatement.getTreeNode() + (elseStatement == null ? "" : ("<li><code>else</code><ul>" + elseStatement.getTreeNode() + "</ul>"))  + "</li></li>";
 
     }
 

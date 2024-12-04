@@ -1,13 +1,17 @@
 package com.amadeus.xu.parser;
 
 import com.amadeus.xu.lexer.Token;
+
 import static com.amadeus.xu.lexer.TokenType.*;
-import  com.amadeus.xu.lexer.TokenType;
+
+import com.amadeus.xu.lexer.TokenType;
 import com.amadeus.xu.parser.expression.*;
 import com.amadeus.xu.parser.statment.BlockStatement;
 import com.amadeus.xu.parser.statment.ExpressionStatement;
 import com.amadeus.xu.parser.statment.IfStatement;
 import com.amadeus.xu.parser.statment.StatementNode;
+import com.amadeus.xu.parser.statment.declaration.VariableDeclarationStatement;
+import com.amadeus.xu.parser.statment.WhileStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +30,7 @@ public class Parser {
         this.tokens = tokens;
         this.statements = new ArrayList<>();
 
-        while(!isAtEnd()) {
+        while (!isAtEnd()) {
             statements.add(declaration());
         }
 
@@ -49,13 +53,21 @@ public class Parser {
 
 
     private StatementNode statement() {
-        if(match(IF)) return ifStatement();
-        //if(match(WHILE)) return whileStatement();
+        if (match(IF)) return ifStatement();
+        if(match(WHILE)) return whileStatement();
         //if(match(FOR)) return forStatement();
-        if(match(LEFT_BRACES)) return blockStatement();
+        if (match(LEFT_BRACES)) return blockStatement();
         //if(match(PRINT)) return printStatement();
 
         return expressionStatement();
+    }
+
+    private StatementNode whileStatement() {
+        consume(LEFT_PARENTHESIS, "cade o parenteses de abertura do while poxa?");
+        ExpressionNode logicalExpr = comparison();
+        consume(RIGHT_PARENTHESIS, "cade o parenteses de fechamento do while poxa?");
+        StatementNode block = statement();
+        return new WhileStatement(logicalExpr, block);
     }
 
     private StatementNode blockStatement() {
@@ -73,10 +85,101 @@ public class Parser {
 
     private StatementNode declaration() {
 
-        //if (match(IDENTIFIER)) return variableDeclaration();
+        if (match(IDENTIFIER, AUTO, CONST)) return variableDeclaration();
 
         return statement();
     }
+
+    private StatementNode variableDeclaration() {
+        Token firstArgument = previous();
+        Token constant = null;
+        Token type = null;
+        Token name = null;
+        Token equal = null;
+        ExpressionNode value = null;
+
+        if(firstArgument.type == CONST) {
+            constant = previous();
+            advance();
+            firstArgument = previous();
+        }
+            if(firstArgument.type != AUTO) {
+                type = previous();
+                if(match(IDENTIFIER)) {
+                    name = previous();
+                    if(match(EQUAL)) {
+                        equal = previous();
+                        value = expression();
+                        return new VariableDeclarationStatement(constant, type, name, equal, value);
+                    } else {
+                        return new VariableDeclarationStatement(constant, type, name, equal, value);
+                    }
+                } else {
+                    backtrack();
+                    return expressionStatement();
+                }
+            } else {
+                type = previous();
+                consume(IDENTIFIER, "cade o nome do auto poxa?");
+                name = previous();
+                consume(EQUAL, "cade o igual poxa?");
+                equal = previous();
+                value = expression();
+                return new VariableDeclarationStatement(constant, type, name, equal, value);
+            }
+    }
+
+//    private StatementNode variableDeclaration() {
+//        Token type = previous();
+//        if (type.type != CONST) {
+//            //const
+//            if (type.type != AUTO) {
+//                //const - auto
+//                if (match(IDENTIFIER)) {
+//                    consume(IDENTIFIER, "xxxx");
+//                    Token name = previous();
+//                        if (match(EQUAL)) {
+//                            Token equal = previous();
+//                            ExpressionNode value = expression();
+//                            return new VariableDeclarationStatement(null, type, name, equal, value);
+//                        } else {
+//                            return new VariableDeclarationStatement(null, type, name, null, null);
+//                        }
+//
+//                }
+//            } else {
+//
+//                //AUTO CONST
+//
+//                Token constant = previous();
+//                if (match(IDENTIFIER)) {
+//                    Token typee = previous();
+//                    if (match(IDENTIFIER)) {
+//                        Token namee = previous();
+//                        if (match(EQUAL)) {
+//                            Token equal = previous();
+//                            ExpressionNode value = expression();
+//                            return new VariableDeclarationStatement(type, typee, namee, equal, value);
+//                        } else {
+//                            return new VariableDeclarationStatement(constant, typee, namee, null, null);
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//
+//            //nop const
+//
+//            consume(IDENTIFIER, "Expect variable name after auto");
+//            Token name = previous();
+//            consume(EQUAL, "xxxx");
+//            Token equal = previous();
+//            ExpressionNode value = expression();
+//            return new VariableDeclarationStatement(null, type, name, equal, value, dimensions);
+//        }
+//        backtrack();
+//        return expressionStatement();
+//    }
 
     private StatementNode expressionStatement() {
         ExpressionNode expression = expression();
@@ -111,8 +214,8 @@ public class Parser {
     }
 
     private ExpressionNode assignment() {
-        ExpressionNode leftExpression = or();
-        if(match(EQUAL)) {
+        ExpressionNode leftExpression = ternary();
+        if (match(EQUAL)) {
             Token equal = previous();
             ExpressionNode value = assignment();
 
@@ -123,6 +226,21 @@ public class Parser {
             error("Invalid assignment target.");
         }
         return leftExpression;
+    }
+
+    private ExpressionNode ternary() {
+        if (match(IF)) {
+            consume(LEFT_PARENTHESIS, "Expect '(' after 'if'.");
+            ExpressionNode condition = expression();
+            consume(RIGHT_PARENTHESIS, "Expect ')' after 'if'.");
+            ExpressionNode thenExpression = expression();
+            consume(ELSE, "Expect 'else' keyword after then branch in ternary expression.");
+            ExpressionNode elseExpression = expression();
+            return new TernaryExpression(condition, thenExpression, elseExpression);
+
+        }
+
+        return or();
     }
 
     private ExpressionNode or() {
@@ -148,7 +266,7 @@ public class Parser {
     private ExpressionNode equality() {
         ExpressionNode leftExpression = comparison();
 
-        while(match(EQUAL_EQUAL, NOT_EQUAL)) {
+        while (match(EQUAL_EQUAL, NOT_EQUAL)) {
             Token operator = previous();
             ExpressionNode rightExpression = comparison();
             leftExpression = new LogicalExpression(leftExpression, operator, rightExpression);
@@ -234,6 +352,10 @@ public class Parser {
 
     private boolean isAtEnd() {
         return peek().type == EOF;
+    }
+
+    private void backtrack() {
+        current--;
     }
 
 }

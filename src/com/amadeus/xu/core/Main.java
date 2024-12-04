@@ -42,7 +42,7 @@ public class Main {
 
         System.out.println();
         String HTML = TreeGenerator.generateTree(expressionsList);
-        TreeGenerator.writeHTML("Desktop\\Index.html", HTML);
+        TreeGenerator.writeHTML("/home/live/Desktop/index.html", HTML);
 
 
     }

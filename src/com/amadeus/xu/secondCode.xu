@@ -1,46 +1,21 @@
-!!!(-5+(3*4))
-6+4+(4/4)
-"!!!(-5+(3*4))"
-"xu language is awesome!"
-identifier
-true
-!!!((3+3)/6)
 
-a*x*x + b*y + c
 
-!!!!!!!!!(!(false))
 
-8 != 9
 
-true or false
-true and false
-
-10 + 20
-
+const i32 x = 10
+i32 x = 10
+const i32 x
 i32 x
-i32 y
-y = 20
-x = y
+
+const auto x = 10
+auto x = 10
 
 
-if (!true) {
+
+while(5>10) {
     5 + 5
-} else {
-    x = true and false
 }
 
 
-{
-
-i32 x
-i32 y
-y = 20
-x = y
-
-!!!!!!!!!(!(false))
-
-8 != 9
-
-
-}
+while(5>10) 5+5
 

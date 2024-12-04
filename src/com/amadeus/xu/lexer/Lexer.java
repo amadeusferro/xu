@@ -33,6 +33,8 @@ public class Lexer {
         keywords.put("for", FOR);
         keywords.put("or", OR);
         keywords.put("and", AND);
+        keywords.put("auto", AUTO);
+        keywords.put("const", CONST);
     }
 
     public Lexer() {
@@ -85,6 +87,12 @@ public class Lexer {
                 break;
             case '}':
                 makeToken(RIGHT_BRACES, "}");
+                break;
+            case '[':
+                makeToken(OPENBRACKET, "[");
+                break;
+            case ']':
+                makeToken(CLOSEBRACKET, "]");
                 break;
             case ',':
                 makeToken(COMMA, ",");
