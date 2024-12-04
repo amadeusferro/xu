@@ -7,13 +7,13 @@ import com.amadeus.xu.parser.statment.StatementNode;
 public class VariableDeclarationStatement extends StatementNode {
 
     private final Token constant;
-    private final Token type;
+    private final ExpressionNode type;
     private final Token name;
     private final Token equal;
     private final ExpressionNode value;
 
 
-    public VariableDeclarationStatement(Token constant,Token type, Token name, Token equal, ExpressionNode value) {
+    public VariableDeclarationStatement(Token constant,ExpressionNode type, Token name, Token equal, ExpressionNode value) {
         this.constant = constant;
         this.type = type;
         this.name = name;
@@ -23,7 +23,7 @@ public class VariableDeclarationStatement extends StatementNode {
 
     @Override
     public String toString() {
-        return "Variable Declaration(" + ((constant == null) ? "" : (constant.lexeme)) + type.lexeme + name.lexeme + ((equal == null) ? "" : (equal.lexeme)) + ((value == null) ? "" : (value.toString())) + ")";
+        return "Variable Declaration(" + ((constant == null) ? "" : (constant.lexeme)) + type.toString() + name.lexeme + ((equal == null) ? "" : (equal.lexeme)) + ((value == null) ? "" : (value.toString())) + ")";
     }
 
     @Override
@@ -31,7 +31,7 @@ public class VariableDeclarationStatement extends StatementNode {
         String result = "<li><code>Variable Declaration</code><ul>";
 
         result += (constant == null) ? "" : ("<li><code>" + constant.lexeme + "</code></li>");
-        result += "<li><code>" + type.lexeme + "</code></li>";
+        result += type.getTreeNode();
         result += "<li><code>" + name.lexeme + "</code></li>";
 
         result += (equal == null) ? "" : ("<li><code>" + equal.lexeme + "</code></li>");

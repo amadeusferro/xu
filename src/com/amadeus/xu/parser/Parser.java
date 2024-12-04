@@ -98,6 +98,8 @@ public class Parser {
         Token equal = null;
         ExpressionNode value = null;
 
+        StatementNode declaration = null;
+
         if(firstArgument.type == CONST) {
             constant = previous();
             advance();
@@ -105,14 +107,23 @@ public class Parser {
         }
             if(firstArgument.type != AUTO) {
                 type = previous();
+                ExpressionNode expr = new VariableGetExpression(type);
+
                 if(match(IDENTIFIER)) {
                     name = previous();
+                    while (match(OPENBRACKET)) {
+                        Token size = consume(INT, "Expect array size after '['.");
+                        int sizeInt = (int) size.literal;
+                        consume(CLOSEBRACKET, "Expect ']' after array size.");
+
+                        expr = new ArrayTypeExpression(expr, sizeInt);
+                    }
                     if(match(EQUAL)) {
                         equal = previous();
                         value = expression();
-                        return new VariableDeclarationStatement(constant, type, name, equal, value);
+                        return new VariableDeclarationStatement(constant, expr, name, equal, value);
                     } else {
-                        return new VariableDeclarationStatement(constant, type, name, equal, value);
+                        return new VariableDeclarationStatement(constant, expr, name, equal, value);
                     }
                 } else {
                     backtrack();
@@ -125,7 +136,7 @@ public class Parser {
                 consume(EQUAL, "cade o igual poxa?");
                 equal = previous();
                 value = expression();
-                return new VariableDeclarationStatement(constant, type, name, equal, value);
+                return new VariableDeclarationStatement(constant, new VariableGetExpression(type), name, equal, value);
             }
     }
 
@@ -313,10 +324,12 @@ public class Parser {
         return new GroupExpression(paren, expression);
     }
 
-    private void consume(TokenType type, String message) {
+    private Token consume(TokenType type, String message) {
         if (!match(type)) {
             error(message);
         }
+
+        return previous();
     }
 
     private void error(String message) {
