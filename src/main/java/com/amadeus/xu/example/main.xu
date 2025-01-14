@@ -1,0 +1,20 @@
+const i32 x = 10
+i32 x = 10
+const i32 x[2][2][2][2]
+
+i32 x
+
+const auto x = 10
+auto x = 10
+
+
+
+while(5>10) {
+    5 + 5
+}
+
+
+while(5>10) 5+5
+
+const u8 names[2] = "aoba"
+
